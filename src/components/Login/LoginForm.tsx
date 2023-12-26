@@ -16,10 +16,6 @@ const LoginForm = () => {
         const {error,data:resData} = await login(data.email, data.password);
         if(error){
             methods.setError("root.authError", {message: error.message});
-        }else{
-            toast.success("Welcome back!", {
-                description: `Signed in as ${resData.user?.email}`
-            });
         }
     };
   return (
