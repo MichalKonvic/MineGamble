@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/sonner'
 import AuthProvider from '@/providers/Auth/AuthProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
+import ProfileProvider from '@/providers/ProfileProvider'
+import Navigation from '@/components/Navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,8 +30,11 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            {children}
-            <Toaster richColors closeButton />
+            <ProfileProvider>
+              <Navigation/>
+              {children}
+              <Toaster richColors closeButton />
+            </ProfileProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
