@@ -1,8 +1,9 @@
 "use client";
 import React from 'react'
-import ProfileMenu from './ProfileMenu/ProfileMenu'
-import ThemeSelect from './ThemeSelect'
+import ProfileMenu from '../ProfileMenu/ProfileMenu'
+import ThemeSelect from '../ThemeSelect'
 import { useProfile } from '@/providers/ProfileProvider';
+import NavigationBalance from './NavigationBalance';
 
 const Navigation = () => {
   const {profile} = useProfile();
@@ -14,7 +15,7 @@ const Navigation = () => {
             {
                 profile && (
                   <>
-                    <p className='text-sm leading-none'>$ {profile?.balance}</p>
+                    <NavigationBalance/>
                     <ProfileMenu/>
                   </>
 

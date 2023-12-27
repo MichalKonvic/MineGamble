@@ -1,10 +1,6 @@
 "use client";
 import { useProfile } from '@/providers/ProfileProvider';
-import { createClient } from '@/services/supabase/client';
-import { DropdownMenuLabel } from '@radix-ui/react-dropdown-menu';
-import { RealtimePostgresUpdatePayload } from '@supabase/supabase-js';
-import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner';
+import React from 'react'
 
 
 
@@ -21,7 +17,7 @@ const BalanceLabel = () => {
         ):(
             <>
                 <p className='text-sm leading-none'>Balance:</p>
-                <p className="text-sm leading-none text-muted-foreground">$ {profile?.balance}</p>
+                <p className="text-sm leading-none text-muted-foreground">{profile?.balance?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p>
             </>
         )}
     </div>

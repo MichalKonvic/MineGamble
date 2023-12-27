@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/sonner'
 import AuthProvider from '@/providers/Auth/AuthProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import ProfileProvider from '@/providers/ProfileProvider'
-import Navigation from '@/components/Navigation'
+import Navigation from '@/components/Navigation/Navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 

@@ -18,8 +18,12 @@ const AuthProvider:FC<PropsWithChildren> = ({ children }) => {
     const [session, setSession] = useState<null|Session>(null);
     const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
-        const {data:authListener} = supabaseClient.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
+        const {data:authListener} = supabaseClient.auth.onAuthStateChange((_event, newSession) => {
+            if(session?.user.id === newSession?.user.id) {
+                if(isLoading) setIsLoading(false);
+                return; // Disable re-rendering if the session is the same
+            }
+            setSession(newSession);
             if(isLoading){
                 setIsLoading(false);
             }
@@ -27,7 +31,7 @@ const AuthProvider:FC<PropsWithChildren> = ({ children }) => {
         return () => {
             authListener.subscription.unsubscribe();
         };
-    },[supabaseClient,isLoading]);
+    },[supabaseClient,isLoading,session]);
     const login = useCallback(async (email: string, password: string) => {
         setIsLoading(true);
         const res = await supabaseClient.auth.signInWithPassword({ email, password });
