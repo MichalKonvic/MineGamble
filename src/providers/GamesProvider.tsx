@@ -23,7 +23,7 @@ interface IJoinedGames extends Tables<"games"> {
     mine_indexes: Tables<"mine_indexes"> | null;
 };
 
-type TGames = IJoinedGames[];
+export type TGames = IJoinedGames[];
 
 const GamesProvider:FC<PropsWithChildren> = ({children}) => {
     const {session,isLoading:isAuthLoading} = useAuth();
