@@ -1,7 +1,9 @@
-import React from 'react'
+import { useGame } from '@/providers/GameProvider'
+import React, { FC } from 'react'
 
-const page = () => {
-    // TODO add game selector
+const page:FC = () => {
+  const {createGame,game} = useGame();
+  console.log(game)
   return (
     <div>
         

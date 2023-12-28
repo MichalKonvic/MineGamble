@@ -1,10 +1,7 @@
-import GamesProvider, { useGames } from '@/providers/GamesProvider'
-import React, { useEffect, useMemo } from 'react'
+import GamesProvider from '@/providers/GamesProvider'
+import React from 'react'
 import DashboardOverviewCards from './DashboardOverviewCards'
 import { Button } from '../ui/button'
-import { DataTable } from '../GamesTable/data-table'
-import { StateToStatus, TGame, columns } from '../GamesTable/columns'
-import { formatTimeElapsed } from '@/lib/utils'
 import DashboardTable from './DashboardTable'
 import Link from 'next/link'
 
