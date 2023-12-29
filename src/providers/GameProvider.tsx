@@ -1,7 +1,6 @@
 "use client";
 import { createClient } from "@/services/supabase/client";
 import {Tables} from "@/services/supabase/database.types";
-import { useParams, useRouter } from "next/navigation";
 import { FC, PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAuth } from "./Auth/AuthProvider";
 import { toast } from "sonner";
@@ -45,70 +44,12 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
 
 
 
-    const {fetchGame} = useMemo(() => {
-        const pick = async (index:number) => {
-            if(!game) return;
-            let { error } = await supabaseClient
-            .rpc('pick', {
-                game_id: game!.id, 
-                index, 
-                token: session!.access_token
-            })
-            if (error) {
-                toast.error(error.message);
-            }
-        }
-        const pickRandom = async () => {
-            if(!game) return;
-            let { error } = await supabaseClient
-            .rpc('pick_random', {
-                game_id: game!.id, 
-                token: session!.access_token
-            })
-            if (error) {
-                toast.error(error.message);
-            }
-            fetchGame();
-        }
-        const checkout = async () => {
-            if(!game) return;
-            let { error } = await supabaseClient
-            .rpc('checkout', {
-                game_id: game!.id, 
-                token: session!.access_token
-            })
-            if (error) {
-                toast.error(error.message);
-            }
-        }
-        const fetchGame = async () => {
-            const {data,error} = await supabaseClient.from("games").select("*, mine_indexes ( * )").eq("id",gameId).single();
-            if(error) {
-                toast.error(error.message);
-                return;
-            }
-            if(!data) {
-                toast.error("Game not found");
-                return;
-            }
-            setGame({
-                ...data,
-                pick: pick,
-                pickRandom: pickRandom,
-                checkout: checkout,
-            });
-        }
-        return {
-            fetchGame,
-        }
-    },[game, gameId, session, supabaseClient])
 
 
 
 
     const createGame = useCallback(async (bet:number,mines_count:number, size:number) => {
         if(isProfileLoading) return;
-        setIsLoading(true);
         const {data,error} = await supabaseClient.from("games").insert({
             player_id: profile!.id,
             bet,
@@ -123,25 +64,85 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
         }
         if(!data) return;
         setGameId(data?.id);
-        setIsLoading(false);
     },[supabaseClient,isProfileLoading,profile]);
+
 
     useEffect(() => {
         if(!gameId) return;
+        if(!session?.access_token) return;
+        const fetchGame = async () => {
+            if(!gameId) return;
+            setIsLoading(true);
+            const {data,error} = await supabaseClient.from("games").select("*, mine_indexes ( * )").eq("id",gameId).single();
+            if(error || !data) {
+                if(error) {
+                    toast.error(error.message);
+
+                }else {
+                    toast.error("Game not found");
+
+                }
+                 setIsLoading(false);
+                return;
+            }
+            const pickRandom = async () => {
+                    let { error } = await supabaseClient
+                    .rpc('pick_random', {
+                        game_id: data.id, 
+                        token: session!.access_token
+                    })
+                    if (error) {
+                        toast.error(error.message);
+                    }
+                    fetchGame();
+                
+            }
+            const pick = async (index:number) => {
+                    let { error } = await supabaseClient
+                    .rpc('pick', {
+                        game_id: data.id, 
+                        index, 
+                        token: session!.access_token
+                    })
+                    if (error) {
+                        toast.error(error.message);
+                    }
+                    fetchGame();
+            }
+            const checkout = async () => {
+                    let { error } = await supabaseClient
+                    .rpc('checkout', {
+                        game_id: data.id, 
+                        token: session!.access_token
+                    })
+                    if (error) {
+                        toast.error(error.message);
+                    }
+                    fetchGame();
+            }
+            const gameData = {
+                ...data,
+                pick: pick,
+                pickRandom: pickRandom,
+                checkout: checkout,
+            };
+            setGame(gameData);
+            setIsLoading(false);
+        }
         fetchGame();
         const realtime = supabaseClient.channel("games")
-        .on("postgres_changes",{event:"*", schema:"public", table: "games",filter: `id=eq.${gameId}`},fetchGame);
+        .on("postgres_changes",{event:"*", schema:"public", table: "games"},fetchGame);
         return () => {
             realtime.unsubscribe();
         }
-    },[fetchGame,gameId,supabaseClient]);
+    },[gameId,supabaseClient,session]);
    
 
 
     return (
         <GameContext.Provider value={{
-            isLoading: false,
-            game: null,
+            isLoading,
+            game,
             createGame,
         }}>
             {children}

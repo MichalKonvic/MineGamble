@@ -1,3 +1,4 @@
+"use client"
 import PrivateRoute from '@/components/PrivateRoute'
 import GameProvider from '@/providers/GameProvider'
 import React, { FC, PropsWithChildren } from 'react'
