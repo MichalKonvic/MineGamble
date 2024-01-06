@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {DataTablePagination} from "./DataTablePagination"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -49,6 +49,9 @@ export function DataTable<TData, TValue>({
         columnFilters
       },
   })
+  useEffect(() => {
+    table.getColumn("date")?.toggleSorting(true);
+  },[table])
 
   return (
     <div className="flex flex-col gap-2 w-full">
