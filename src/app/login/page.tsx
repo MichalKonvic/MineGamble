@@ -5,7 +5,7 @@ import React from 'react'
 const LoginPage = () => {
   return (
     <PublicRoute>
-      <div className='w-full h-screen flex justify-center items-center'>
+      <div className='absolute-center'>
           <LoginCard/>
       </div>
     </PublicRoute>

@@ -30,7 +30,7 @@ const GamesProvider:FC<PropsWithChildren> = ({children}) => {
     const [isLoading,setLoading] = useState(true);
     const [games,setGames] = useState<null|TGames>(null);
     const supabaseClient = createClient();
-    const gamesSelect = useCallback(async () => {
+    const fetchGames = useCallback(async () => {
         setLoading(true);
         const {data,error} = await supabaseClient
         .from("games")
@@ -46,8 +46,8 @@ const GamesProvider:FC<PropsWithChildren> = ({children}) => {
     },[supabaseClient]);
     const handleGamesEvent = useCallback((payload: RealtimePostgresUpdatePayload<TGames>) => {
         // select request
-        gamesSelect();
-    },[gamesSelect]);
+        fetchGames();
+    },[fetchGames]);
 
     useEffect(() => {
         if(isAuthLoading) return;
@@ -56,7 +56,7 @@ const GamesProvider:FC<PropsWithChildren> = ({children}) => {
             setGames(null);
             return;
         }
-        gamesSelect()
+        fetchGames()
         const realtimeAll = supabaseClient
         .channel("games")
         // @ts-ignore Type error
@@ -70,7 +70,7 @@ const GamesProvider:FC<PropsWithChildren> = ({children}) => {
         return () => {
             realtimeAll.unsubscribe();
         }
-    },[supabaseClient,handleGamesEvent,isAuthLoading,session,gamesSelect]);
+    },[supabaseClient,handleGamesEvent,isAuthLoading,session,fetchGames]);
     return (
         <GamesContext.Provider value={
             {
