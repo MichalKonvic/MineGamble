@@ -1,5 +1,5 @@
 "use client"
-import React from 'react'
+import React, { BaseSyntheticEvent, FormEvent } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Input } from '../ui/input';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
@@ -12,8 +12,9 @@ import { toast } from 'sonner';
 const LoginForm = () => {
     const methods = useFormContext<z.infer<typeof formSchema>>();
     const {login} = useAuth();
-    const onSubmit = async (data:z.infer<typeof formSchema>) => {
-        const {error,data:resData} = await login(data.email, data.password);
+    const onSubmit = async (data:z.infer<typeof formSchema>, event: BaseSyntheticEvent<object, any, any>|undefined) => {
+        event?.preventDefault();
+        const {error} = await login(data.email, data.password);
         if(error){
             methods.setError("root.authError", {message: error.message});
         }
