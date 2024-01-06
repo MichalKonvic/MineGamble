@@ -52,12 +52,12 @@ const ProfileProvider:FC<PropsWithChildren> = ({children}) => {
             return;
         }
         fetchProfile()
-        const realtimeUpdate = supabaseClient
+        const realtime = supabaseClient
         .channel("profiles")
         .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles"}, handleProfileChange)
         .subscribe();
         return () => {
-            realtimeUpdate.unsubscribe();
+            realtime.unsubscribe();
         }
     },[supabaseClient,handleProfileChange,isAuthLoading,session,fetchProfile]);
     return (

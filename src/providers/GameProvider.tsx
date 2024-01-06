@@ -17,38 +17,35 @@ interface IJoinedGame extends Tables<"games"> {
 interface IGameContext {
     isLoading: boolean;
     game: IJoinedGame | null;
-    createGame: (bet:number, mines_count:number, size:number,redirect:boolean) => Promise<void>;
+    createGame: (bet:number, mines_count:number, size:number) => Promise<number | undefined>;
     setGameId: (gameId:number) => void;
 }
 
 const GameContext = createContext<IGameContext>({
     isLoading: false,
     game: null,
-    createGame: async () => {},
+    createGame: async () => {return undefined},
     setGameId: () => {},
 });
 
 const useGame = (gameId?:number) => {
     const game = useContext(GameContext);
-    if(gameId) {
-        game.setGameId(gameId);
-    }
+    useEffect(() => {
+        if(gameId && game) {
+            game.setGameId(gameId);
+        }
+    },[game,gameId])
     return game;
 };
 
 
-interface Props {
-    initialGameId?: number;
-}
-
-const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}) => {
-    const [gameId,setGameId] = useState<number | null>(initialGameId);
+const GameProvider:FC<PropsWithChildren> = ({children}) => {
+    const [gameId,setGameId] = useState<number | null>(null);
     const [game, setGame] = useState<IJoinedGame | null>(null);
     const {profile,isLoading:isProfileLoading} = useProfile();
     const [isLoading, setIsLoading] = useState(false);
     const supabaseClient = createClient();
     const {session} = useAuth();
-    const router = useRouter();
 
 
 
@@ -58,7 +55,7 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
 
 
 
-    const createGame = useCallback(async (bet:number,mines_count:number, size:number,redirect:boolean) => {
+    const createGame = useCallback(async (bet:number,mines_count:number, size:number) => {
         if(isProfileLoading) return;
         const {data,error} = await supabaseClient.from("games").insert({
             player_id: profile!.id,
@@ -74,10 +71,9 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
         }
         if(!data) return;
         setGameId(data.id);
-        if(redirect) {
-            router.push(`/game/${data.id}`);
-        }
-    },[supabaseClient,isProfileLoading,profile,router]);
+        return data.id;
+    },[supabaseClient,isProfileLoading,profile]);
+
 
 
     useEffect(() => {
@@ -140,8 +136,14 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
             setIsLoading(false);
         }
         fetchGame();
-        const realtime = supabaseClient.channel("games")
-        .on("postgres_changes",{event:"*", schema:"public", table: "games"},fetchGame).subscribe();
+        const realtime = supabaseClient
+        .channel("games")
+        .on("postgres_changes", { event: 'UPDATE', schema: "public", table: "games"}, (data) => {
+            const newGame = data.new as IJoinedGame;
+            if(newGame.id !== gameId) return;
+            fetchGame();
+        })
+        .subscribe();
         return () => {
             realtime.unsubscribe();
         }

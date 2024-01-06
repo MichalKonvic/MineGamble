@@ -12,9 +12,7 @@ const Page:FC<Props> = ({params}) => {
   const router = useRouter();
   if(isNaN(Number(params.id))) router.push('/game');
   return (
-    <div>
-        <Game gameId={Number(params.id)} />
-    </div>
+      <Game gameId={Number(params.id)} />
   )
 }
 
