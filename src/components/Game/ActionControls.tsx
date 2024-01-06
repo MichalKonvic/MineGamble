@@ -10,8 +10,9 @@ const SettingsControls = () => {
     if(game?.finished || !game) return null;
   return (
     <Card className='p-4 flex gap-4 h-fit flex-col md:w-56 lg:w-72'>
-        <Button variant={"secondary"}>Pick Random</Button>
-        <Button variant={"default"}>Checkout</Button>
+        <h1>Win: {game.winning.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</h1>
+        <Button onClick={game.pickRandom} variant={"secondary"}>Pick Random</Button>
+        <Button onClick={game.checkout} variant={"default"}>Checkout</Button>
     </Card>
   )
 }

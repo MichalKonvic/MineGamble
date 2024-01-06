@@ -1,6 +1,6 @@
 "use client"
 import { Input } from '../ui/input'
-import React, { useEffect, useMemo } from 'react'
+import React, { use, useEffect, useMemo, useState } from 'react'
 import { Button } from '../ui/button'
 import { Card } from '../ui/card'
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -32,19 +32,33 @@ const SettingsControls = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bet: 0,
-      size: 5,
-      minesCount: 3
+      bet: game?.bet ?? 0,
+      size: game?.size ?? 5,
+      minesCount: game?.mines_count ?? 1
     },
   });
+  useEffect(() => {
+    if(!game) return;
+    if(profileLoading) return;
+    let bet = game.bet;
+    if(bet > profile!.balance && game.finished) bet = profile!.balance;
+    form.reset({
+      bet: bet,
+      size: game.size,
+      minesCount: game.mines_count
+    });
+  },[game,form,profile,profileLoading]);
   const disableControls = (() => {
     if(isLoading) return true;
     if(!game) return false;
     return !game.finished;
   })();
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if(!game?.finished) return;
-    createGame(values.bet,values.minesCount,values.size,true);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if(!game?.finished && game !== null) return;
+    const newGameId = await createGame(values.bet,values.minesCount,values.size);
+    if(newGameId) {
+      router.push(`/game/${newGameId}`);
+    }
   }
   return (
     <Card className='p-4 flex h-fit flex-col md:w-56 lg:w-72'>
