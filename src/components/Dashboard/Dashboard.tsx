@@ -13,7 +13,7 @@ const Dashboard = () => {
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <div className='pt-2'>
             <Button>
-              <Link href='/app/game/new'>
+              <Link href='/game/'>
               New game
               </Link>
             </Button>
