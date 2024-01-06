@@ -6,6 +6,7 @@ import { RealtimePostgresUpdatePayload } from "@supabase/supabase-js";
 import { useState, useCallback, useEffect, useContext, createContext, FC, PropsWithChildren } from "react";
 import { toast } from "sonner";
 import { useAuth } from "./Auth/AuthProvider";
+import { Tables } from "../../types";
 
 interface IProfileContext {
     profile: TProfile|null;
@@ -19,16 +20,30 @@ const ProfileContext = createContext<IProfileContext>({
 
 const useProfile = () => useContext(ProfileContext);
 
-type TProfile = Database["public"]["Tables"]["profiles"]["Row"];
+type TProfile = Tables<"profiles">;
 
 const ProfileProvider:FC<PropsWithChildren> = ({children}) => {
     const {session,isLoading:isAuthLoading} = useAuth();
     const [isLoading,setLoading] = useState(true);
     const [profile,setProfile] = useState<null|TProfile>(null);
     const supabaseClient = createClient();
-    const handleProfileUpdate = useCallback((payload: RealtimePostgresUpdatePayload<TProfile>) => {
-        setProfile(payload.new);
-    },[]);
+    const fetchProfile = useCallback(async () => {
+        setLoading(true);
+        const {data,error} = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .single();
+        if(error) {
+            toast.error(error.message);
+        }
+        if(data) {
+            setProfile(data);
+        }
+        setLoading(false);
+    },[supabaseClient]);
+    const handleProfileChange = useCallback((payload: RealtimePostgresUpdatePayload<TProfile>) => {
+        fetchProfile();
+    },[fetchProfile]);
     useEffect(() => {
         if(isAuthLoading) return;
         if(!session) {
@@ -36,27 +51,15 @@ const ProfileProvider:FC<PropsWithChildren> = ({children}) => {
             setProfile(null);
             return;
         }
-        (async () => {
-            const {data,error} = await supabaseClient
-            .from("profiles")
-            .select("*")
-            .single();
-            if(error) {
-                toast.error(error.message);
-            }
-            if(data) {
-                setProfile(data);
-            }
-            setLoading(false);
-        })();
-        const realtime = supabaseClient
+        fetchProfile()
+        const realtimeUpdate = supabaseClient
         .channel("profiles")
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles"}, handleProfileUpdate)
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles"}, handleProfileChange)
         .subscribe();
         return () => {
-            realtime.unsubscribe();
+            realtimeUpdate.unsubscribe();
         }
-    },[supabaseClient,handleProfileUpdate,isAuthLoading,session]);
+    },[supabaseClient,handleProfileChange,isAuthLoading,session,fetchProfile]);
     return (
         <ProfileContext.Provider value={
             {
