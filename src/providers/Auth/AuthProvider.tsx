@@ -29,11 +29,15 @@ const AuthProvider:FC<PropsWithChildren> = ({ children }) => {
     },[supabaseClient,isLoading]);
     const login = useCallback(async (email: string, password: string) => {
         const res = await supabaseClient.auth.signInWithPassword({ email, password });
+        if(res.data?.user) toast.success("Welcome back!", {
+            description: `Signed in as ${res.data.user?.email}`
+        });
         return res;
     },[supabaseClient]);
     const logout = useCallback(async () => {
         const { error } = await supabaseClient.auth.signOut();
         if (error) throw error;
+        toast.success("Logged out");
         setSession(null);
     },[supabaseClient]);
     return(
