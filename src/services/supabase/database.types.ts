@@ -87,19 +87,19 @@ export interface Database {
       profiles: {
         Row: {
           auth_id: string
-          balance: number | null
+          balance: number
           created_at: string
           id: number
         }
         Insert: {
           auth_id: string
-          balance?: number | null
+          balance?: number
           created_at?: string
           id?: number
         }
         Update: {
           auth_id?: string
-          balance?: number | null
+          balance?: number
           created_at?: string
           id?: number
         }

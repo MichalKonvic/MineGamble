@@ -5,6 +5,7 @@ import { FC, PropsWithChildren, createContext, useCallback, useContext, useEffec
 import { useAuth } from "./Auth/AuthProvider";
 import { toast } from "sonner";
 import { useProfile } from "./ProfileProvider";
+import { useRouter } from "next/navigation";
 
 interface IJoinedGame extends Tables<"games"> {
     mine_indexes: Tables<"mine_indexes"> | null;
@@ -16,16 +17,24 @@ interface IJoinedGame extends Tables<"games"> {
 interface IGameContext {
     isLoading: boolean;
     game: IJoinedGame | null;
-    createGame: (bet:number, mines_count:number, size:number) => Promise<void>;
+    createGame: (bet:number, mines_count:number, size:number,redirect:boolean) => Promise<void>;
+    setGameId: (gameId:number) => void;
 }
 
 const GameContext = createContext<IGameContext>({
     isLoading: false,
     game: null,
     createGame: async () => {},
+    setGameId: () => {},
 });
 
-const useGame = () => useContext(GameContext);
+const useGame = (gameId?:number) => {
+    const game = useContext(GameContext);
+    if(gameId) {
+        game.setGameId(gameId);
+    }
+    return game;
+};
 
 
 interface Props {
@@ -39,6 +48,7 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
     const [isLoading, setIsLoading] = useState(false);
     const supabaseClient = createClient();
     const {session} = useAuth();
+    const router = useRouter();
 
 
 
@@ -48,7 +58,7 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
 
 
 
-    const createGame = useCallback(async (bet:number,mines_count:number, size:number) => {
+    const createGame = useCallback(async (bet:number,mines_count:number, size:number,redirect:boolean) => {
         if(isProfileLoading) return;
         const {data,error} = await supabaseClient.from("games").insert({
             player_id: profile!.id,
@@ -63,8 +73,11 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
             return;
         }
         if(!data) return;
-        setGameId(data?.id);
-    },[supabaseClient,isProfileLoading,profile]);
+        setGameId(data.id);
+        if(redirect) {
+            router.push(`/game/${data.id}`);
+        }
+    },[supabaseClient,isProfileLoading,profile,router]);
 
 
     useEffect(() => {
@@ -94,8 +107,6 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
                     if (error) {
                         toast.error(error.message);
                     }
-                    fetchGame();
-                
             }
             const pick = async (index:number) => {
                     let { error } = await supabaseClient
@@ -107,7 +118,6 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
                     if (error) {
                         toast.error(error.message);
                     }
-                    fetchGame();
             }
             const checkout = async () => {
                     let { error } = await supabaseClient
@@ -131,7 +141,7 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
         }
         fetchGame();
         const realtime = supabaseClient.channel("games")
-        .on("postgres_changes",{event:"*", schema:"public", table: "games"},fetchGame);
+        .on("postgres_changes",{event:"*", schema:"public", table: "games"},fetchGame).subscribe();
         return () => {
             realtime.unsubscribe();
         }
@@ -144,6 +154,7 @@ const GameProvider:FC<PropsWithChildren<Props>> = ({children,initialGameId=null}
             isLoading,
             game,
             createGame,
+            setGameId
         }}>
             {children}
         </GameContext.Provider>

@@ -12,11 +12,11 @@ const Dashboard = () => {
       <div className='flex-1 space-y-4 p-8 pt-6'>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <div className='pt-2'>
-            <Button>
-              <Link href='/game/'>
-              New game
-              </Link>
-            </Button>
+            <Link href='/game/'>
+              <Button>
+                New game
+              </Button>
+            </Link>
           </div>
           <DashboardOverviewCards/>
           <DashboardTable/>

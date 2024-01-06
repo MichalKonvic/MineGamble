@@ -1,15 +1,21 @@
-import React, { FC } from 'react'
+"use client";
+import Game from '@/components/Game/Game';
+import { useGame } from '@/providers/GameProvider'
+import { useRouter } from 'next/navigation';
+import React, { FC, useEffect } from 'react'
 interface Props {
     params: {
-        id: string
+        id: number;
     }
 }
-const page:FC<Props> = ({params}) => {
+const Page:FC<Props> = ({params}) => {
+  const router = useRouter();
+  if(isNaN(Number(params.id))) router.push('/game');
   return (
     <div>
-        {params.id}
+        <Game gameId={Number(params.id)} />
     </div>
   )
 }
 
-export default page
+export default Page
