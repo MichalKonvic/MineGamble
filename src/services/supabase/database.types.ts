@@ -236,7 +236,7 @@ export interface Database {
       }
     }
     Enums: {
-      game_state: "win" | "lose" | "checkout" | "canceled" | "not_evaluated"
+      game_state: "win" | "lose" | "checkout" | "cancelled" | "not_evaluated"
     }
     CompositeTypes: {
       [_ in never]: never

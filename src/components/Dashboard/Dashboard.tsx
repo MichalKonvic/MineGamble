@@ -1,9 +1,14 @@
-import GamesProvider from '@/providers/GamesProvider'
-import React from 'react'
+import GamesProvider, { useGames } from '@/providers/GamesProvider'
+import React, { useEffect, useMemo } from 'react'
 import DashboardOverviewCards from './DashboardOverviewCards'
 import { Button } from '../ui/button'
+import { DataTable } from '../GamesTable/data-table'
+import { StateToStatus, TGame, columns } from '../GamesTable/columns'
+import { formatTimeElapsed } from '@/lib/utils'
+import DashboardTable from './DashboardTable'
 
 const Dashboard = () => {
+
   return (
     <GamesProvider>
       <div className='flex-1 space-y-4 p-8 pt-6'>
@@ -12,6 +17,7 @@ const Dashboard = () => {
             <Button>New game</Button>
           </div>
           <DashboardOverviewCards/>
+          <DashboardTable/>
       </div>
     </GamesProvider>
   )

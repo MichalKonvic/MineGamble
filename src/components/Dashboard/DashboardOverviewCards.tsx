@@ -8,6 +8,7 @@ const DashboardOverviewCards = () => {
   const totalWagered = useMemo(() => {
     if(isLoading) return "$0.00";
     const wageredNumber = games?.reduce((acc,game) => {
+      if(game.state === "cancelled") return acc;
       return acc + game.bet;
     },0)!;
     return wageredNumber?.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
@@ -15,6 +16,7 @@ const DashboardOverviewCards = () => {
   const averageBet = useMemo(() => {
     if(isLoading) return "$0.00";
     const averageSum = games?.reduce((acc,game) => {
+      if(game.state === "cancelled") return acc;
       return acc + game.bet;
     },0) || 0;
     const average = averageSum /( games?.length || 0) || 0;
