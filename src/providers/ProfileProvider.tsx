@@ -6,7 +6,7 @@ import { RealtimePostgresUpdatePayload } from "@supabase/supabase-js";
 import { useState, useCallback, useEffect, useContext, createContext, FC, PropsWithChildren } from "react";
 import { toast } from "sonner";
 import { useAuth } from "./Auth/AuthProvider";
-import { Tables } from "../../types";
+import { Tables } from "@/services/supabase/database.types";
 
 interface IProfileContext {
     profile: TProfile|null;
