@@ -7,6 +7,7 @@ import { IAuthContext } from "./types";
 
 const authContext = createContext<IAuthContext>({
     login: async (email: string, password: string) => {throw new Error("AuthProvider not initialized")}, // @ts-ignore
+    discordLogin: async () => {throw new Error("AuthProvider not initialized")}, // @ts-ignore
     logout: () => {},
     session: null as null|Session,
     isLoading: true
@@ -40,6 +41,12 @@ const AuthProvider:FC<PropsWithChildren> = ({ children }) => {
         });
         return res;
     },[supabaseClient]);
+    const discordLogin = useCallback(async () => {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'discord',
+        })
+        if(error) toast.error(error.message);
+      },[supabaseClient])
     const logout = useCallback(async () => {
         setIsLoading(true);
         const { error } = await supabaseClient.auth.signOut();
@@ -48,7 +55,7 @@ const AuthProvider:FC<PropsWithChildren> = ({ children }) => {
         setSession(null);
     },[supabaseClient]);
     return(
-        <authContext.Provider value={{ login, logout, session, isLoading }}>
+        <authContext.Provider value={{ login,discordLogin, logout, session, isLoading }}>
             {children}
         </authContext.Provider>
     )

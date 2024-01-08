@@ -2,6 +2,7 @@ import { AuthError, AuthTokenResponsePassword, Session } from "@supabase/supabas
 
 interface IAuthContext {
     login: (email: string, password: string) => Promise<AuthTokenResponsePassword>; 
+    discordLogin: () => void;
     logout: () => void;
     session: null|Session;
     isLoading: boolean;
