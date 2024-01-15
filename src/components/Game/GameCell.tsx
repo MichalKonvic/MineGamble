@@ -19,7 +19,7 @@ const GameCell:FC<Props> = ({index}) => {
         return CellTypes["hidden"];
     },[game,isLoading,index]);
     const handleClick = () => {
-        if(isLoading) return;
+        // if(isLoading) return; uncomment if disallow multiple cell reveals
         if(buttonType != CellTypes["hidden"]) return;
         if(game!.finished) return;
         if(!waitingForReveal) {
